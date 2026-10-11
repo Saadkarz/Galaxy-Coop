@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galaxy Co-op</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="brand">
+      <div class="star-logo" aria-hidden="true">★</div>
+      <div>
+        <h1>Galaxy Co-op</h1>
+        <p class="sub">Super Mario Galaxy 2, together online</p>
+      </div>
+    </div>
+    <button class="ghost-btn" id="open-settings" title="Settings">⚙ Settings</button>
+  </header>
+
+  <div id="problems" class="banner warn" hidden></div>
+
+  <!-- Before playing: pick a character, then host or join -->
+  <main id="setup">
+    <section class="card">
+      <h2><span class="step">1</span> Choose your player</h2>
+      <label class="field">
+        <span>Your name</span>
+        <input id="name" maxlength="24" autocomplete="nickname" placeholder="Player name">
+      </label>
+      <div class="heroes" role="radiogroup" aria-label="Character">
+        <button class="hero mario" data-char="mario" role="radio">
+          <span class="emblem">M</span>
+          <span class="hero-name">Mario</span>
+          <span class="hero-blurb">The all-rounder. Steady jumps, tight turns.</span>
+        </button>
+        <button class="hero luigi" data-char="luigi" role="radio">
+          <span class="emblem">L</span>
+          <span class="hero-name">Luigi</span>
+          <span class="hero-blurb">Jumps higher, runs faster, slides a little more.</span>
+        </button>
+      </div>
+      <p class="hint">Your pick replaces the save file's character from the first galaxy you enter.</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="step">2</span> Play together</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="host" role="tab">Host a game</button>
+        <button class="tab" data-tab="join" role="tab">Join a game</button>
+      </div>
+
+      <div class="panel" id="panel-host">
+        <div class="visibility" role="radiogroup" aria-label="Who can join">
+          <button class="vis active" data-vis="private" role="radio">
+            <span class="vis-icon">🔒</span>
+            <span class="vis-title">Private</span>
+            <span class="vis-text">Not listed anywhere. Friends join with the address you send them.</span>
+          </button>
+          <button class="vis" data-vis="public" role="radio">
+            <span class="vis-icon">🌍</span>
+            <span class="vis-title">Public</span>
+            <span class="vis-text">Listed in the room browser so anyone can find and join it.</span>
+          </button>
+        </div>
+
+        <div class="grid">
+          <label class="field">
+            <span>Room name</span>
+            <input id="room-name" maxlength="32" placeholder="My galaxy">
+          </label>
+          <label class="field">
+            <span>Password <em>(optional)</em></span>
+            <input id="host-password" type="password" maxlength="32" placeholder="Anyone can join">
+          </label>
+          <label class="field">
+            <span>Players</span>
+            <select id="max-players">
+              <option>2</option><option>3</option><option selected>4</option>
+              <option>5</option><option>6</option><option>7</option><option>8</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>UDP port</span>
+            <input id="port" type="number" min="1024" max="65535">
+          </label>
+        </div>
+
+        <fieldset class="options">
+          <legend>Shared between players</legend>
+          <label class="toggle"><input type="checkbox" id="opt-stars"><span>Power Stars: one player gets it, everyone gets it</span></label>
+          <label class="toggle"><input type="checkbox" id="opt-enemies"><span>Defeated enemies stay defeated for everyone</span></label>
+          <label class="toggle"><input type="checkbox" id="opt-switches"><span>Switches, doors and gates</span></label>
+          <p class="hint">Coins, star bits and following the host's galaxy are always shared. Every player sets these for their own game, so agree on them.</p>
+        </fieldset>
+
+        <button class="primary" id="host-btn">Host &amp; start the game</button>
+      </div>
+
+      <div class="panel" id="panel-join" hidden>
+        <div class="rooms-head">
+          <h3>Public rooms</h3>
+          <button class="ghost-btn" id="refresh-rooms">↻ Refresh</button>
+        </div>
+        <div id="rooms" class="rooms"><p class="empty">Loading rooms...</p></div>
+
+        <div class="divider"><span>or join a private room</span></div>
+        <div class="grid">
+          <label class="field">
+            <span>Address</span>
+            <input id="join-address" placeholder="203.0.113.7:7777">
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="join-password" type="password" maxlength="32" placeholder="If the room has one">
+          </label>
+        </div>
+        <button class="primary" id="join-btn">Join &amp; start the game</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- While playing -->
+  <main id="live" hidden>
+    <section class="card status-card">
+      <div class="status-line">
+        <span id="status-pill" class="pill">Connecting</span>
+        <div>
+          <h2 id="live-title">Room</h2>
+          <p id="live-sub" class="sub"></p>
+        </div>
+      </div>
+      <div class="live-actions">
+        <button class="ghost-btn" id="relaunch">Restart Dolphin</button>
+        <button class="danger" id="leave">Leave</button>
+      </div>
+    </section>
+
+    <section class="card" id="invite-card" hidden>
+      <h2>Invite friends</h2>
+      <div class="invite-row">
+        <div>
+          <span class="label">Over the internet</span>
+          <code id="invite-public">waiting for the router...</code>
+        </div>
+        <button class="ghost-btn copy" data-copy="invite-public">Copy</button>
+      </div>
+      <div class="invite-row">
+        <div>
+          <span class="label">Same home network</span>
+          <code id="invite-lan"></code>
+        </div>
+        <button class="ghost-btn copy" data-copy="invite-lan">Copy</button>
+      </div>
+      <p id="port-note" class="hint"></p>
+    </section>
+
+    <div class="two-col">
+      <section class="card">
+        <h2>Players</h2>
+        <ul id="players" class="players"></ul>
+      </section>
+      <section class="card">
+        <h2>Your game</h2>
+        <dl class="facts">
+          <dt>Dolphin</dt><dd id="fact-dolphin"></dd>
+          <dt>Co-op patch</dt><dd id="fact-attached"></dd>
+          <dt>Where</dt><dd id="fact-where"></dd>
+        </dl>
+        <p class="hint">Start your save file in Dolphin. When the host enters a galaxy, everyone in a galaxy is brought along.</p>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Activity</h2>
+      <ol id="log" class="log"></ol>
+    </section>
+  </main>
+
+  <dialog id="settings">
+    <form method="dialog" class="settings-form">
+      <h2>Settings</h2>
+      <label class="field">
+        <span>Dolphin folder</span>
+        <input id="set-dolphin" placeholder="D:\Games\Dolphin-x64">
+      </label>
+      <label class="field">
+        <span>Super Mario Galaxy 2 (USA) image</span>
+        <input id="set-image" placeholder="Found automatically in Dolphin's game folders">
+      </label>
+      <label class="field">
+        <span>Lobby server (public room list)</span>
+        <input id="set-lobby" placeholder="lobby.example.com:7700">
+      </label>
+      <label class="toggle"><input type="checkbox" id="set-launch"><span>Start Dolphin for me (off: attach to a Dolphin you started yourself)</span></label>
+      <dl class="facts small" id="env-facts"></dl>
+      <div class="dialog-actions">
+        <button value="cancel" class="ghost-btn">Cancel</button>
+        <button value="save" class="primary" id="save-settings">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>

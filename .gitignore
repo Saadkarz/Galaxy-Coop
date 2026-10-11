@@ -1,0 +1,26 @@
+# Game data and extracted discs never belong in the repo
+*.iso
+*.wbfs
+*.rvz
+*.nkit.iso
+*.dol
+third_party/_downloads/
+third_party/_src/
+
+# Toolchain binaries (fetched by tools/setup.ps1)
+third_party/Syati/deps/
+third_party/SyatiModuleBuildTool/
+
+# Build output
+build/
+game/smg2/modules/*/build/
+pc/**/bin/
+pc/**/obj/
+pc/**/TestResults/
+*.o
+
+# Editors
+.vs/
+.vscode/
+*.user
+__pycache__/

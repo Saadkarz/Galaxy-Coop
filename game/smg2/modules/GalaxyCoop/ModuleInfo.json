@@ -1,0 +1,6 @@
+{
+  "Name": "GalaxyCoop",
+  "Author": "Galaxy Co-op",
+  "Description": "Online co-op: shares player state and world events with a PC companion through an in-memory mailbox.",
+  "SupportedGames": [ "SB4E" ]
+}
